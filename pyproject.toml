@@ -1,0 +1,32 @@
+[project]
+name = "nudge-phone-bot"
+version = "0.1.0"
+description = "Daily Reflection Nudge"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "pipecat-ai[webrtc,daily,cartesia,openai,silero,deepgram,websocket,runner,local-smart-turn]==0.0.83",
+    "pipecatcloud>=0.2.4",
+    "python-dotenv==1.1.1",
+    "loguru==0.7.3",
+    "langgraph>=0.2.4",
+    "langmem>=0.0.28",
+    "pymongo==4.14.1",
+    "openai>=1.74.0,<=1.99.1",
+    "typing-extensions==4.15.0",
+    "langgraph-checkpoint>=2.0.23,<3.0.0",
+    "langchain-mongodb==0.7.0",
+    "langgraph-store-mongodb>=0.1.0",
+    "langgraph-checkpoint-mongodb==0.2.0",
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0"
+]
+
+[dependency-groups]
+dev = [
+    "ruff~=0.12.1",
+]
+
+[tool.ruff]
+line-length = 100
+[tool.ruff.lint]
+select = ["I"]
