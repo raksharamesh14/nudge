@@ -9,7 +9,7 @@ from typing import Dict
 
 from loguru import logger
 
-from graph import Graph
+from graph import get_graph
 
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.frames.frames import (
@@ -21,14 +21,13 @@ from pipecat.frames.frames import (
 
 class Processor(FrameProcessor):
     """Custom FrameProcessor that integrates LangGraph memory management with PipeCat pipeline.
-    
-    This processor follows PipeCat's official documentation patterns for custom frame processors.
     It handles LLM message frames and streams responses using our MongoDB-backed memory system.
     """
 
-    def __init__(self, user_id: str = "test_user", session_id: str = "test_session", **kwargs):
+    def __init__(self, user_id: str, session_id: str, **kwargs):
         super().__init__(**kwargs)
-        self.graph = Graph(default_user_id=user_id, default_session_id=session_id)
+        # Use the global Graph instance instead of creating a new one
+        self.graph = get_graph()
         self._session_id = session_id
         self._user_id = user_id
         logger.info(f"Initialized LangGraph processor with user_id: {self._user_id}, session_id: {self._session_id}")
@@ -37,7 +36,7 @@ class Processor(FrameProcessor):
         # call parent class process_frame
         await super().process_frame(frame, direction) 
         
-        # Handle text frames from STT - custom logic to handle LLM response through langgraph nodes
+        # Handle text frames from STT flowing downstream towards TTS; avoid reacting to our own TTS audio
         if isinstance(frame, TextFrame) and direction == FrameDirection.DOWNSTREAM:
             logger.info(f"Processing text frame: {frame.text}")
             # Signal response start
@@ -66,7 +65,7 @@ class Processor(FrameProcessor):
                 token_buffer += token
                 
                 # Send chunks when we have complete words/phrases for better TTS
-                if token_buffer.endswith((' ', '.', '!', '?', ',', '\n')) or len(token_buffer) > 50:
+                if token_buffer.endswith((' ', '.', '!', '?', ',', '\n')) or len(token_buffer) > 24:
                     if token_buffer.strip():
                         logger.debug(f"Streaming text chunk: {token_buffer.strip()}")
                         await self.push_frame(TextFrame(text=token_buffer.strip()), direction)
@@ -95,15 +94,3 @@ class Processor(FrameProcessor):
                     TextFrame(text="I'm experiencing technical difficulties. Please try again."), 
                     direction
                 )
-    
-    def set_user_id(self, user_id: str):
-        """Update the user ID for this processor."""
-        self._user_id = user_id
-        logger.info(f"Updated user_id to: {user_id}")
-    
-    def get_session_info(self) -> Dict[str, str]:
-        """Get current session information."""
-        return {
-            "user_id": self._user_id,
-            "session_id": self._session_id
-        }
