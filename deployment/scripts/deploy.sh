@@ -12,7 +12,7 @@ PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 APP_NAME="nudge-bot"
 APP_DIR="/opt/nudge-bot"
 SERVICE_USER="ec2-user"  # Changed for Amazon Linux
-DOMAIN="${1:-your-domain.com}"  # Set this as first argument
+DOMAIN="${1:-api.nudgedaily.app}"  # Default to your subdomain; can override via arg
 
 echo "🚀 Deploying Nudge Voice Bot to EC2..."
 echo "📁 Project root: $PROJECT_ROOT"
@@ -26,7 +26,7 @@ cd $APP_DIR
 # Clone repository (replace with your repo)
 if [ ! -d "$APP_DIR/.git" ]; then
     echo "📥 Cloning repository..."
-    git clone https://github.com/your-username/nudge.git .
+    git clone git@github.com:your-username/nudge.git .
 fi
 
 # Pull latest changes
@@ -176,7 +176,11 @@ echo ""
 echo "📊 Status:"
 docker ps | grep $APP_NAME
 echo ""
+if [ "$DOMAIN" != "your-domain.com" ]; then
+echo "🌐 Application URL: https://$DOMAIN"
+else
 echo "🌐 Application URL: http://$DOMAIN"
+fi
 echo "📝 Logs: docker logs $APP_NAME"
 echo "🔄 Restart: docker restart $APP_NAME"
 echo ""

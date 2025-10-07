@@ -4,10 +4,10 @@
 
 set -e
 
-DOMAIN="${1:-your-domain.com}"
+DOMAIN="${1:-api.nudgedaily.app}"
 EMAIL="${2:-admin@$DOMAIN}"
 
-if [ "$DOMAIN" = "your-domain.com" ]; then
+if [ -z "$DOMAIN" ]; then
     echo "❌ Please provide your domain name:"
     echo "Usage: ./setup-ssl.sh your-domain.com admin@your-domain.com"
     exit 1
@@ -17,7 +17,7 @@ echo "🔒 Setting up SSL certificate for $DOMAIN..."
 
 # Update Nginx configuration with actual domain
 echo "📝 Updating Nginx configuration..."
-sudo sed -i "s/your-domain.com/$DOMAIN/g" /etc/nginx/sites-available/nudge-bot
+sudo sed -i "s/your-domain.com/$DOMAIN/g" /etc/nginx/conf.d/nudge-bot.conf
 
 # Test Nginx configuration
 echo "🧪 Testing Nginx configuration..."
@@ -29,9 +29,9 @@ sudo systemctl restart nginx
 
 # Install certbot if not already installed
 if ! command -v certbot &> /dev/null; then
-    echo "📦 Installing certbot..."
-    sudo apt-get update
-    sudo apt-get install -y certbot python3-certbot-nginx
+    echo "📦 Installing certbot (Amazon Linux / yum)..."
+    sudo yum install -y epel-release
+    sudo yum install -y certbot python3-certbot-nginx
 fi
 
 # Obtain SSL certificate
