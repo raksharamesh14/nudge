@@ -13,6 +13,7 @@ APP_NAME="nudge-bot"
 APP_DIR="/opt/nudge-bot"
 SERVICE_USER="ec2-user"  # Changed for Amazon Linux
 DOMAIN="${1:-api.nudgedaily.app}"  # Default to your subdomain; can override via arg
+SOURCE_DIR="/home/ec2-user/nudge"  # Optional local working copy
 
 echo "🚀 Deploying Nudge Voice Bot to EC2..."
 echo "📁 Project root: $PROJECT_ROOT"
@@ -23,46 +24,21 @@ sudo mkdir -p $APP_DIR
 sudo chown $SERVICE_USER:$SERVICE_USER $APP_DIR
 cd $APP_DIR
 
-# Clone repository (replace with your repo)
-if [ ! -d "$APP_DIR/.git" ]; then
-    echo "📥 Cloning repository..."
-    git clone git@github.com:your-username/nudge.git .
+echo "📦 Syncing code from $SOURCE_DIR ..."
+if [ ! -d "$SOURCE_DIR/.git" ]; then
+    echo "❌ $SOURCE_DIR is missing or not a git repo. Aborting."
+    exit 1
 fi
-
-# Pull latest changes
-echo "🔄 Pulling latest changes..."
-git pull origin main
+(cd "$SOURCE_DIR" && git pull origin main)
+rsync -a --delete --exclude ".git" "$SOURCE_DIR"/ "$APP_DIR"/
 
 # Create environment file
-echo "⚙️ Setting up environment..."
-cat > .env << EOF
-# API Keys (set these as environment variables or use AWS Secrets Manager)
-DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY:-your_deepgram_api_key}
-OPENAI_API_KEY=${OPENAI_API_KEY:-your_openai_api_key}
-ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-your_anthropic_api_key}
-CARTESIA_API_KEY=${CARTESIA_API_KEY:-your_cartesia_api_key}
-MONGODB_URI=${MONGODB_URI:-your_mongodb_uri}
-
-# Daily (for production video/audio rooms)
-DAILY_API_KEY=${DAILY_API_KEY:-your_daily_api_key}
-DAILY_API_URL=https://api.daily.co/v1
-
-# Twilio (for telephony)
-TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-your_twilio_account_sid}
-TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-your_twilio_auth_token}
-
-# Application settings
-USE_MONGODB=true
-LOG_LEVEL=INFO
-EOF
-
-echo "📝 Created .env file. Please edit it with your actual API keys:"
-echo "   nano .env"
-echo "   # or"
-echo "   vi .env"
-echo ""
-echo "Press Enter when you've updated the .env file with your API keys..."
-read -p "Press Enter to continue..."
+if [ -f .env ]; then
+    echo "🔐 Using existing .env"
+else
+    echo "❌ Missing .env in $APP_DIR. Please upload it, then re-run."
+    exit 1
+fi
 
 # Build Docker image
 echo "🐳 Building Docker image..."
