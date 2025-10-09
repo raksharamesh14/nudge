@@ -38,8 +38,8 @@ COPY --from=builder --chown=app:app /app/.venv /home/app/.venv
 
 # Copy application code
 COPY --chown=app:app src/ /home/app/src/
-COPY --chown=app:app models/ /home/app/models/
-COPY --chown=app:app data/ /home/app/data/
+COPY --chown=app:app deployment/scripts/ /home/app/deployment/scripts/
+COPY --chown=app:app .env /home/app/.env
 
 # Set environment variables
 ENV PATH="/home/app/.venv/bin:$PATH"
@@ -53,4 +53,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Run the application
-CMD ["python", "src/bot.py"]
+CMD ["bash", "-c", "python deployment/scripts/download_s3.py && python src/bot.py"]

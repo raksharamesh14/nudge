@@ -43,8 +43,12 @@ def get_transport_params() -> TransportParams:
                 ),
                 sample_rate=16000    # Force 16kHz sample rate - Silero VAD only supports 8kHz or 16kHz
     )
+    
+    # local models directory
+    model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models", "smart-turn-v2")
+    
     turn_analyzer = LocalSmartTurnAnalyzerV2(
-        smart_turn_model_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), "models", "smart-turn-v2"),
+        smart_turn_model_path=model_path,
         params=SmartTurnParams(
             stop_secs=1.0,
             pre_speech_ms=0.0,

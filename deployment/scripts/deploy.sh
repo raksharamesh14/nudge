@@ -9,8 +9,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
 # Configuration
-APP_NAME="nudge-bot"
-APP_DIR="/opt/nudge-bot"
+APP_NAME="nudge"
+APP_DIR="/opt/nudge"
 SERVICE_USER="ec2-user"  # Changed for Amazon Linux
 DOMAIN="${1:-api.nudgedaily.app}"  # Default to your subdomain; can override via arg
 SOURCE_DIR="/home/ec2-user/nudge"  # Optional local working copy
