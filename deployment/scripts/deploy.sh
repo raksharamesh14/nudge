@@ -18,10 +18,14 @@ SOURCE_DIR="/home/ec2-user/nudge"  # Optional local working copy
 echo "🚀 Deploying Nudge Voice Bot to EC2..."
 echo "📁 Project root: $PROJECT_ROOT"
 echo "🌐 Domain: $DOMAIN"
+echo "📂 App directory: $APP_DIR (maps to /home/app in container)"
+echo "🤖 Models directory: $APP_DIR/models (maps to /home/app/models in container)"
 
 # Create application directory
 sudo mkdir -p $APP_DIR
+sudo mkdir -p $APP_DIR/models
 sudo chown $SERVICE_USER:$SERVICE_USER $APP_DIR
+sudo chown $SERVICE_USER:$SERVICE_USER $APP_DIR/models
 cd $APP_DIR
 
 echo "📦 Syncing code from $SOURCE_DIR ..."
@@ -57,6 +61,7 @@ docker run -d \
     --env-file .env \
     -p 8000:8000 \
     -v $APP_DIR/logs:/home/app/logs \
+    -v $APP_DIR/models:/home/app/models \
     $APP_NAME:latest
 
 # Wait for container to be ready

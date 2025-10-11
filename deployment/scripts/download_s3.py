@@ -18,6 +18,7 @@ def download_from_s3():
     
     print(f"📥 Downloading from S3 bucket: {bucket_name}")
     print(f"📁 Local directory: {local_dir}")
+    print(f"💡 Note: This maps to /opt/nudge/models/smart-turn-v2 on the host")
     
     # Create local directory
     Path(local_dir).mkdir(parents=True, exist_ok=True)
